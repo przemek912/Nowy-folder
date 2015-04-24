@@ -22,6 +22,7 @@ class GUIForm(QtGui.QMainWindow):
 	licznik=0
 	pliki = []
 	d =dane()
+	linie = [0,0,0]
 	def __init__(self, parent=None):
 
 		QtGui.QWidget.__init__(self,parent)
@@ -31,7 +32,24 @@ class GUIForm(QtGui.QMainWindow):
 		self.ui.widget.canvas.mpl_connect('button_press_event',self.klikniety)
 		QtCore.QObject.connect(self.ui.pushButton, QtCore.SIGNAL('clicked()'),lambda: self.PlotFunc(d))
 		QtCore.QObject.connect(self.ui.pushButton1, QtCore.SIGNAL('clicked()'),lambda: self.OtworzPliki(d))
-
+		
+		self.ui.lewyTekst.mousePressEvent = self.lewyTekstonClick
+		self.ui.srodekTekst.mousePressEvent = self.srodekTekstonClick
+		self.ui.prawyTekst.mousePressEvent = self.prawyTekstonClick
+		#print self.licznik
+		
+		
+	def lewyTekstonClick(self,licznik):
+		self.licznik = 0
+		print self.licznik
+			
+		
+	def srodekTekstonClick(self,licznik):
+		self.licznik=1
+		print self.licznik
+	def prawyTekstonClick(self,licznik):
+		self.licznik=2	
+		print self.licznik
 		
 	def PlotFunc(self,a):
 		#a = dane("C:\Users\Przemek\Desktop\Nowy folder\_dane\W132X2s3_01.dat",1550,1750,2000,314,500)
@@ -45,21 +63,29 @@ class GUIForm(QtGui.QMainWindow):
 		self.ui.widget.canvas.draw()
     
 	def klikniety(self,event):
-		GUIForm.licznik=GUIForm.licznik+1
+		#GUIForm.licznik=GUIForm.licznik+1
 		klawisz = QtGui.QApplication.keyboardModifiers()
 		if klawisz == QtCore.Qt.ControlModifier:
 			if event.button==1: #lpm
-				self.ui.widget.canvas.ax.axvline(event.xdata, color='k', linestyle='solid')#pionowa kreska na wykresie
+				if self.licznik >=3:
+					self.licznik=0
+					self.linie[self.licznik].remove()
+				
+				#print dir(self.linie[self.licznik])
+				self.linie[self.licznik]=self.ui.widget.canvas.ax.axvline(event.xdata, color='k', linestyle='solid')#pionowa kreska na wykresie
+				self.licznik=self.licznik+1
+				
+
+				
 			elif event.button==3: #ppm
 				circle1= plt.Circle((event.xdata,event.ydata),.1,color='r')
 				fig = self.ui.widget.canvas.ax.add_artist(circle1)
 				#kropka - do wierzcholkow
-			if GUIForm.licznik >=3:
-				GUIForm.licznik=0
+
 				
-		print self.licznik
+		
 		self.ui.lewyTekst.setText('nowy') #zmiana tekstu po kliknieciu
-		print('kliknales', event.button, event.xdata, event.ydata) 
+		#print('kliknales', event.button, event.xdata, event.ydata) 
 		
 		self.ui.widget.canvas.draw()
 		
