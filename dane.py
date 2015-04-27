@@ -35,7 +35,13 @@ class dane(object):
 		self.y=self.y+y
 	
 	def __init__(self):
-		pass
+		self.x=0
+		self.y=0
+		self.popt=0
+		self.pcov=0
+		self.popt=0
+		self.poptR=0
+		self.poptL=0
 
 	def pojedynczyPlik(sciezka):
 		self.sciezka = sciezka

@@ -21,17 +21,16 @@ class GUIForm(QtGui.QMainWindow):
 	m2=0
 	licznik=0
 	pliki = []
-	d =dane()
+	dane =dane()
 	linie = [0,0,0]
 	def __init__(self, parent=None):
 
 		QtGui.QWidget.__init__(self,parent)
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
-		d=dane();
 		self.ui.widget.canvas.mpl_connect('button_press_event',self.klikniety)
 		QtCore.QObject.connect(self.ui.pushButton, QtCore.SIGNAL('clicked()'),lambda: self.PlotFunc(d))
-		QtCore.QObject.connect(self.ui.pushButton1, QtCore.SIGNAL('clicked()'),lambda: self.OtworzPliki(d))
+		QtCore.QObject.connect(self.ui.pushButton1, QtCore.SIGNAL('clicked()'),lambda: self.OtworzPliki())
 		
 		self.ui.lewyTekst.mousePressEvent = self.lewyTekstonClick
 		self.ui.srodekTekst.mousePressEvent = self.srodekTekstonClick
@@ -67,27 +66,26 @@ class GUIForm(QtGui.QMainWindow):
 		klawisz = QtGui.QApplication.keyboardModifiers()
 		if klawisz == QtCore.Qt.ControlModifier: #ctrl
 			if event.button==1: #lpm
-				"""self.linie[0]=self.ui.widget.canvas.ax.axvline(event.xdata, color='r', linestyle='solid')
-				self.ui.widget.canvas.draw()
-				self.linie[0].remove()
-				self.linie[0].remove
-				self.linie[0].remove
-				self.linie[0]=0
-				self.ui.widget.canvas.draw()"""
-				
 				if self.licznik <=2:#2
 					if (type(self.linie[self.licznik]) != int) :
 						self.linie[self.licznik].remove
 						self.linie[self.licznik].remove()
 						self.ui.widget.canvas.draw()
+						
 					self.linie[self.licznik]=self.ui.widget.canvas.ax.axvline(event.xdata, color='r', linestyle='solid')#pionowa kreska na wykresie
-					print self.linie[self.licznik].get_xdata()
+					if self.licznik==0:
+						self.ui.lewyTekst.setText( "lewy punkt: "+( str(int(self.linie[0].get_xdata()[0]))))
+						
+					elif self.licznik==1:
+						self.ui.srodekTekst.setText('srodkowy punkt: '+ str(int(self.linie[1].get_xdata()[0])))
+						
+					else:
+						self.ui.prawyTekst.setText('prawy punkt: '+ str(int(self.linie[2].get_xdata()[0])))	
+						
+					
 					if self.licznik <2 and (type(self.linie[self.licznik+1])) ==int:
 						self.licznik=self.licznik+1
 					
-					
-					
-
 				if (self.licznik ==3 and type(self.linie[2]) != int):#2
 					
 					self.linie[2].remove
@@ -96,32 +94,28 @@ class GUIForm(QtGui.QMainWindow):
 					self.ui.widget.canvas.draw()
 					print self.licznik
 					
-								
-				
-
-				
 			elif event.button==3: #ppm
 				circle1= plt.Circle((event.xdata,event.ydata),.1,color='r')
 				fig = self.ui.widget.canvas.ax.add_artist(circle1)
 				#kropka - do wierzcholkow
-
-				
-		
-		self.ui.lewyTekst.setText('nowy') #zmiana tekstu po kliknieciu
-		#print('kliknales', event.button, event.xdata, event.ydata) 
-		
 		self.ui.widget.canvas.draw()
-		
-	def OtworzPliki(self,dane):
+	def OtworzPliki(self):
+		self.pliki =[]
+		self.dane = dane()
 		for path in QtGui.QFileDialog.getOpenFileNames(self, 'Open File',".","(*.dat)"):
 			self.pliki.append(str(path))
 
 		for path in self.pliki:
-			dane.wczytajDane(str(path))
+			self.dane.wczytajDane(str(path))
 			
 		self.ui.widget.canvas.ax.clear()
-		self.ui.widget.canvas.ax.plot(dane.y,'go')	
+		self.ui.widget.canvas.ax.plot(self.dane.y,'go')	
 		self.ui.widget.canvas.draw()
+		self.linie = [0,0,0]
+		self.licznik=0
+		self.ui.lewyTekst.setText( "lewy punkt: ")
+		self.ui.prawyTekst.setText( "prawy punkt: ")
+		self.ui.srodekTekst.setText( "srodkowy punkt: ")
 
 	def closeEvent(self, event):
 		sound_file = "Windows Exclamation.wav"

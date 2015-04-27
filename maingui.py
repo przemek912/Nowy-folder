@@ -41,15 +41,15 @@ class Ui_MainWindow(object):
         self.pushButton1.setGeometry(QtCore.QRect(1040, 50, 75, 23))
         self.pushButton1.setObjectName(_fromUtf8("otworzButtton"))
         
-        self.lewyTekst = QtGui.QLabel('lewy punkt: ',self.centralwidget)
+        self.lewyTekst = QtGui.QLabel('lewy punkt: ----------',self.centralwidget)
         self.lewyTekst.move(1040, 90)
         self.lewyTekst.setObjectName(_fromUtf8("lewyTekst"))
         
-        self.srodekTekst = QtGui.QLabel('srodkowy punkt: ',self.centralwidget)
+        self.srodekTekst = QtGui.QLabel('srodkowy punkt: ----------',self.centralwidget)
         self.srodekTekst.move(1040, 120)
         self.srodekTekst.setObjectName(_fromUtf8("srodekTekst"))
         
-        self.prawyTekst = QtGui.QLabel('prawy punkt: ',self.centralwidget)
+        self.prawyTekst = QtGui.QLabel('prawy punkt: ----------',self.centralwidget)
         self.prawyTekst.move(1040, 150)
         self.prawyTekst.setObjectName(_fromUtf8("prawyTekst"))
         
