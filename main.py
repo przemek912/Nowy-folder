@@ -65,15 +65,38 @@ class GUIForm(QtGui.QMainWindow):
 	def klikniety(self,event):
 		#GUIForm.licznik=GUIForm.licznik+1
 		klawisz = QtGui.QApplication.keyboardModifiers()
-		if klawisz == QtCore.Qt.ControlModifier:
+		if klawisz == QtCore.Qt.ControlModifier: #ctrl
 			if event.button==1: #lpm
-				if self.licznik >=3:
-					self.licznik=0
-					self.linie[self.licznik].remove()
+				"""self.linie[0]=self.ui.widget.canvas.ax.axvline(event.xdata, color='r', linestyle='solid')
+				self.ui.widget.canvas.draw()
+				self.linie[0].remove()
+				self.linie[0].remove
+				self.linie[0].remove
+				self.linie[0]=0
+				self.ui.widget.canvas.draw()"""
 				
-				#print dir(self.linie[self.licznik])
-				self.linie[self.licznik]=self.ui.widget.canvas.ax.axvline(event.xdata, color='k', linestyle='solid')#pionowa kreska na wykresie
-				self.licznik=self.licznik+1
+				if self.licznik <=2:#2
+					if (type(self.linie[self.licznik]) != int) :
+						self.linie[self.licznik].remove
+						self.linie[self.licznik].remove()
+						self.ui.widget.canvas.draw()
+					self.linie[self.licznik]=self.ui.widget.canvas.ax.axvline(event.xdata, color='r', linestyle='solid')#pionowa kreska na wykresie
+					print self.linie[self.licznik].get_xdata()
+					if self.licznik <2 and (type(self.linie[self.licznik+1])) ==int:
+						self.licznik=self.licznik+1
+					
+					
+					
+
+				if (self.licznik ==3 and type(self.linie[2]) != int):#2
+					
+					self.linie[2].remove
+					self.linie[2].remove()
+					self.linie[2]=self.ui.widget.canvas.ax.axvline(event.xdata, color='k', linestyle='solid')
+					self.ui.widget.canvas.draw()
+					print self.licznik
+					
+								
 				
 
 				
@@ -103,7 +126,7 @@ class GUIForm(QtGui.QMainWindow):
 	def closeEvent(self, event):
 		sound_file = "Windows Exclamation.wav"
 		QtGui.QSound.play(sound_file)       
-		odp = QtGui.QMessageBox.question(self, 'Message',
+		odp = QtGui.QMessageBox.question(self, 'Uwaga !',
 			"Czy na pewno zamknac?", QtGui.QMessageBox.Yes | 
 			QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 		
