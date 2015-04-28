@@ -53,6 +53,14 @@ class Ui_MainWindow(object):
         self.prawyTekst.move(1040, 150)
         self.prawyTekst.setObjectName(_fromUtf8("prawyTekst"))
         
+        self.maxlewyTekst = QtGui.QLabel('lewe max: ----------',self.centralwidget)
+        self.maxlewyTekst.move(1040, 180)
+        self.maxlewyTekst.setObjectName(_fromUtf8("lewyTekst"))
+        
+        self.maxprawyTekst = QtGui.QLabel('prawe maxt: ----------',self.centralwidget)
+        self.maxprawyTekst.move(1040, 210)
+        self.maxprawyTekst.setObjectName(_fromUtf8("prawyTekst"))
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1166, 21))

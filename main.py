@@ -14,15 +14,15 @@ from PyQt4 import QtGui,QtCore
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
 
 class GUIForm(QtGui.QMainWindow):
-	lewy=0
-	srodek=0
-	prawy = 0
-	m1=0
-	m2=0
+
+	m1=[0,0]
+	m2=[0,0]
 	licznik=0
+	licznik2=0
 	pliki = []
 	dane =dane()
 	linie = [0,0,0]
+	punkty =[0,0]
 	def __init__(self, parent=None):
 
 		QtGui.QWidget.__init__(self,parent)
@@ -35,6 +35,7 @@ class GUIForm(QtGui.QMainWindow):
 		self.ui.lewyTekst.mousePressEvent = self.lewyTekstonClick
 		self.ui.srodekTekst.mousePressEvent = self.srodekTekstonClick
 		self.ui.prawyTekst.mousePressEvent = self.prawyTekstonClick
+		self.ui.maxlewyTekst.mousePressEvent = self.lewymaxTekstonClick
 		#print self.licznik
 		
 		
@@ -42,13 +43,16 @@ class GUIForm(QtGui.QMainWindow):
 		self.licznik = 0
 		print self.licznik
 			
-		
 	def srodekTekstonClick(self,licznik):
 		self.licznik=1
 		print self.licznik
+		
 	def prawyTekstonClick(self,licznik):
 		self.licznik=2	
 		print self.licznik
+		
+	def lewymaxTekstonClick(self,licznik):
+		self.licznik2=0
 		
 	def PlotFunc(self,a):
 		#a = dane("C:\Users\Przemek\Desktop\Nowy folder\_dane\W132X2s3_01.dat",1550,1750,2000,314,500)
@@ -62,7 +66,6 @@ class GUIForm(QtGui.QMainWindow):
 		self.ui.widget.canvas.draw()
     
 	def klikniety(self,event):
-		#GUIForm.licznik=GUIForm.licznik+1
 		klawisz = QtGui.QApplication.keyboardModifiers()
 		if klawisz == QtCore.Qt.ControlModifier: #ctrl
 			if event.button==1: #lpm
@@ -92,12 +95,42 @@ class GUIForm(QtGui.QMainWindow):
 					self.linie[2].remove()
 					self.linie[2]=self.ui.widget.canvas.ax.axvline(event.xdata, color='k', linestyle='solid')
 					self.ui.widget.canvas.draw()
-					print self.licznik
+					#print self.licznik
 					
 			elif event.button==3: #ppm
-				circle1= plt.Circle((event.xdata,event.ydata),.1,color='r')
-				fig = self.ui.widget.canvas.ax.add_artist(circle1)
+				if self.licznik2<=1:
+					#print self.punkty
+					if (type(self.punkty[self.licznik2]) != int):
+						self.punkty[self.licznik2].remove
+						self.punkty[self.licznik2].remove()
+						self.ui.widget.canvas.draw()
+					self.punkty[self.licznik2] = plt.Circle((event.xdata,event.ydata),50,color='r')
+					#print dir(self.punkty[1])
+					if self.licznik2 ==0:
+						self.ui.maxlewyTekst.setText("lewe max: " + str(self.m1))
+						self.ui.widget.canvas.ax.add_artist(self.punkty[self.licznik2])
+						self.m1=event.xdata,event.ydata
+						if type(self.punkty[1]) == int:
+							self.licznik2=self.licznik2+1
+						
+					else:
+						self.ui.maxprawyTekst.setText("prawe max: sd")
+						self.punkty[self.licznik2] = plt.Circle((event.xdata,event.ydata),50,color='r')
+						self.m2=event.xdata,event.ydata
+						self.ui.widget.canvas.ax.add_artist(self.punkty[1])
+						
+					if self.licznik ==1 and type(self.punkty[1] != int):
+						self.punkty[1].remove
+						self.punkty[1].remove()
+						self.punkty[1] = plt.Circle((event.xdata,event.ydata),50,color='r')
+						self.m2=event.xdata,event.ydata
+						self.ui.widget.canvas.ax.add_artist(self.punkty[1])
+						self.ui.widget.canvas.draw()
+				#circle1= plt.Circle((event.xdata,event.ydata),.1,color='r')
+				#self.ui.widget.canvas.ax.add_artist(self.punkty[self.licznik2]) #fig = 
 				#kropka - do wierzcholkow
+				
+				print self.m1, self.m2
 		self.ui.widget.canvas.draw()
 	def OtworzPliki(self):
 		self.pliki =[]
@@ -116,6 +149,8 @@ class GUIForm(QtGui.QMainWindow):
 		self.ui.lewyTekst.setText( "lewy punkt: ")
 		self.ui.prawyTekst.setText( "prawy punkt: ")
 		self.ui.srodekTekst.setText( "srodkowy punkt: ")
+		self.ui.maxlewyTekst.setText("lewe max: ")
+		self.ui.maxprawyTekst.setText("prawe max: ")
 
 	def closeEvent(self, event):
 		sound_file = "Windows Exclamation.wav"
