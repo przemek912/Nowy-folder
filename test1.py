@@ -38,7 +38,7 @@ def gaus2(x,a1,x01,sigma1,a2,x02,sigma2):
  	p1=a1*exp(-(x-x01)**2/(2*sigma1**2))
 	p2=a2*exp(-(x-x02)**2/(2*sigma2**2))
 	#print a2
-   	return (p1+ p2)
+   	return (p1+p2)
 popt,pcov = curve_fit(gaus2,x[range(l,r)],y[range(l,r)],p0=[314,1700,1,600,1800,1])# ok 
 poptL,pcovL = curve_fit(gaus,x[range(l,sr)],y[range(l,sr)],p0=[314,1700,1])
 poptR,pcovR = curve_fit(gaus,x[range(sr,r)],y[range(sr,r)],p0=[500,1800,1])# drugi gaus
@@ -56,4 +56,6 @@ b=gaus(x,poptL[0],poptL[1],poptL[2])+gaus(x,poptR[0],poptR[1],poptR[2]) #jak sie
 plt.show()
 
 
+for f1, f2 in zip(x, gaus2(x,*popt)):
+	print f1, f2
 

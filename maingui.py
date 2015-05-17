@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1166, 724)
+        MainWindow.resize(1280, 700)
         self.centralwidget = QtGui.QWidget(MainWindow)
         #self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.widget = matplotlibWidget(self.centralwidget)
@@ -41,24 +41,28 @@ class Ui_MainWindow(object):
         self.pushButton1.setGeometry(QtCore.QRect(1040, 50, 75, 23))
         self.pushButton1.setObjectName(_fromUtf8("otworzButtton"))
         
+        self.pushButton2 = QtGui.QPushButton(self.centralwidget)
+        self.pushButton2.setGeometry(QtCore.QRect(1040, 90, 75, 23))
+        self.pushButton2.setObjectName(_fromUtf8("eksportujButton"))
+        
         self.lewyTekst = QtGui.QLabel('lewy punkt: ----------',self.centralwidget)
-        self.lewyTekst.move(1040, 90)
+        self.lewyTekst.move(1040, 120)
         self.lewyTekst.setObjectName(_fromUtf8("lewyTekst"))
         
         self.srodekTekst = QtGui.QLabel('srodkowy punkt: ----------',self.centralwidget)
-        self.srodekTekst.move(1040, 120)
+        self.srodekTekst.move(1040, 150)
         self.srodekTekst.setObjectName(_fromUtf8("srodekTekst"))
         
         self.prawyTekst = QtGui.QLabel('prawy punkt: ----------',self.centralwidget)
-        self.prawyTekst.move(1040, 150)
+        self.prawyTekst.move(1040, 180)
         self.prawyTekst.setObjectName(_fromUtf8("prawyTekst"))
         
-        self.maxlewyTekst = QtGui.QLabel('lewe max: ----------',self.centralwidget)
-        self.maxlewyTekst.move(1040, 180)
+        self.maxlewyTekst = QtGui.QLabel('lewe max: -------------------------------',self.centralwidget)
+        self.maxlewyTekst.move(1040, 210)
         self.maxlewyTekst.setObjectName(_fromUtf8("lewyTekst"))
         
-        self.maxprawyTekst = QtGui.QLabel('prawe maxt: ----------',self.centralwidget)
-        self.maxprawyTekst.move(1040, 210)
+        self.maxprawyTekst = QtGui.QLabel('prawe maxt: -----------------------------',self.centralwidget)
+        self.maxprawyTekst.move(1040, 240)
         self.maxprawyTekst.setObjectName(_fromUtf8("prawyTekst"))
         
         MainWindow.setCentralWidget(self.centralwidget)
@@ -76,7 +80,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
-        self.pushButton.setText(_translate("MainWindow", "rysuj", None))
+        self.pushButton.setText(_translate("MainWindow", "dopasuj", None))
         self.pushButton1.setText(_translate("MainWindow", "otworz", None))
+        self.pushButton2.setText(_translate("MainWindow", "eksportuj", None))
 
 from matplotlibwidgetFile import matplotlibWidget

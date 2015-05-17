@@ -22,7 +22,6 @@ class dane(object):
 	popt=0
 	poptR=0
 	poptL=0
-	#fig, ax = plt.subplots(1, 1)
 	obraz = plt.figure()
 	
 	def wczytajDane(self,sciezka):
@@ -33,6 +32,11 @@ class dane(object):
 		y=data[:,1]
 		self.x =x
 		self.y=self.y+y
+		
+	def zapiszDane(self,sciezka):
+		with open(sciezka, 'w') as f:
+			for f1, f2 in zip(self.x, self.gaus2(self.x,*self.popt)):
+				print >> f, f1, f2
 	
 	def __init__(self):
 		self.x=0
@@ -53,25 +57,12 @@ class dane(object):
 	def gaus2(self,x,a1,x01,sigma1,a2,x02,sigma2):
 		p1=a1*exp(-(x-x01)**2/(2*sigma1**2))
 		p2=a2*exp(-(x-x02)**2/(2*sigma2**2))
-		return p1+ p2
+		return (p1+ p2)
 	
 	def dopasuj(self,l,s,p,m1,m2):
-		self.lewy=l
-		self.srodkowy=s
-		self.prawy=p
-		self.max1=m1
-		self.max2=m2
-		#a=self.gaus([1,2,3, 4, 5],30,4,1)
-		#print a
-		#print self.x,self.y[2000],self.lewy,self.prawy
-		self.popt,cov1 = curve_fit(self.gaus2,self.x[range(self.lewy,self.prawy)],self.y[range(self.lewy,self.prawy)],p0=[314,1700,1,600,1800,1])# ok ale trzeba jeszcze brac x i y z kliknietego maxa
-		self.poptL,cov2 = curve_fit(self.gaus,self.x[range(self.lewy,self.srodkowy)],self.y[range(self.lewy,self.srodkowy)],p0=[314,1700,1])
-		self.poptR,cov3 = curve_fit(self.gaus,self.x[range(self.srodkowy,self.prawy)],self.y[range(self.srodkowy,self.prawy)],p0=[500,1800,1])# drugi gaus
-		#print poptL
-		#print poptR
-		#plt.plot(self.x,self.gaus2(self.x,*popt),'ro',label='fit')
-		#plt.plot(self.x,self.gaus(self.x,poptL[0],poptL[1],poptL[2]),'r--')
-		#plt.plot(self.x,self.gaus(self.x,poptR[0],poptR[1],poptR[2]),'r--')
-		#return popt,poptL,poptR
+		self.popt,self.pcov = curve_fit(self.gaus2,self.x[range(l,p)],self.y[range(l,p)],p0=[m1[1],m1[0],1,m2[1],m2[0],1])
+		self.poptL,cov2 = curve_fit(self.gaus,self.x[range(l,s)],self.y[range(l,s)],p0=[m1[1],m1[0],1])
+		self.poptR,cov3 = curve_fit(self.gaus,self.x[range(s,p)],self.y[range(s,p)],p0=[(m2[1],m2[0],1)])
+
 
 
