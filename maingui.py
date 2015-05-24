@@ -49,7 +49,7 @@ class Ui_MainWindow(object):
         self.lewyTekst.move(1040, 120)
         self.lewyTekst.setObjectName(_fromUtf8("lewyTekst"))
         
-        self.srodekTekst = QtGui.QLabel('srodkowy punkt: ----------',self.centralwidget)
+        self.srodekTekst = QtGui.QLabel(u'środkowy punkt: ----------',self.centralwidget)
         self.srodekTekst.move(1040, 150)
         self.srodekTekst.setObjectName(_fromUtf8("srodekTekst"))
         

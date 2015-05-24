@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 from maingui import *
 from dane import *
@@ -23,12 +24,17 @@ class GUIForm(QtGui.QMainWindow):
 	dane =dane()
 	linie = [0,0,0]
 	punkty =[0,0]
+	
 	def __init__(self, parent=None):
-		#QtGui.QColorDialog.getColor()
+
 		QtGui.QWidget.__init__(self,parent)
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.ui.widget.canvas.mpl_connect('button_press_event',self.klikniety)
+		info = self.ui.menubar.addMenu(' O programie')
+		info.addAction('Instrukcja',self.wyswietlInstrukcje)
+		info.addAction('o Autorze', self.wyswietlAutor)
+		
 		QtCore.QObject.connect(self.ui.pushButton, QtCore.SIGNAL('clicked()'),lambda: self.PlotFunc())
 		QtCore.QObject.connect(self.ui.pushButton1, QtCore.SIGNAL('clicked()'),lambda: self.OtworzPliki())
 		QtCore.QObject.connect(self.ui.pushButton2, QtCore.SIGNAL('clicked()'),lambda: self.EksportujDane())
@@ -37,9 +43,26 @@ class GUIForm(QtGui.QMainWindow):
 		self.ui.srodekTekst.mousePressEvent = self.srodekTekstonClick
 		self.ui.prawyTekst.mousePressEvent = self.prawyTekstonClick
 		self.ui.maxlewyTekst.mousePressEvent = self.lewymaxTekstonClick
-		#print self.licznik
-		
-		
+
+	
+	
+	def wyswietlInstrukcje(self):
+		t= u"Instrukcja obsługi programu. \n  Aby załadować pliki należy nacisnać przycisk otwórz, wybrać pliki, oraz zatwierdzić wybór. W celu porównania kilku widm  \
+istnieje możliwość wczytania kolejnych plików. Po wybraniu plików należy przystąpić do zaznaczenia miejsca do którego zostaną dopasowane krzywe. Aby tego dokonać  \
+należy nacisnąć lewy CTRL i kliknięciami LPM wskazać kolejno lewy, środkowy oraz prawy punkt krzywej. Następnie należy wcisnać CTRL i PPM wskazać lewe oraz prawe maksima krzywej. \
+W razie pomyłki istnieje możliwość zmiany punktów poprzez klikniecie napisu parametru który chcemy zmienić oraz wskazanie nowego punktu. Gdy parametry są juz dopasowane należy nacisnąć \
+przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do pliku .dat. Krzywa zostaje dopasowywana do ostatnio otwartego pliku z danymi."
+		 
+		QtGui.QMessageBox.information(self, 'Instrukcja',
+			t, QtGui.QMessageBox.Ok, 
+			 QtGui.QMessageBox.Ok)
+	
+	def wyswietlAutor(self):
+		t=u"Autor: Przemysław Lewandowski, kontakt  przemek1648@wp.pl" 
+		QtGui.QMessageBox.information(self, 'Instrukcja',
+			t, QtGui.QMessageBox.Ok, 
+			 QtGui.QMessageBox.Ok)
+			 
 	def lewyTekstonClick(self,licznik):
 		self.licznik = 0
 		print self.licznik
@@ -57,17 +80,31 @@ class GUIForm(QtGui.QMainWindow):
 		
 	def PlotFunc(self):
 		if (type(self.linie[0]) == int or type(self.linie[1]) == int or type(self.linie[2]) == int or type(self.m1) == int or type(self.m2) == int):
-			QtGui.QMessageBox.question(self, 'Blad dopasowania !',
-			"Punkty dopasowania nie zostaly ustawione prawidlowo. Do dopasowania potrzeba 3 linii, oraz 2 maksimow", QtGui.QMessageBox.Ok, 
+			QtGui.QMessageBox.critical(self, u'Błąd dopasowania !',
+			u"Punkty dopasowania nie zostaly ustawione prawidlowo. Do dopasowania potrzeba 3 linii, oraz 2 maksimow", QtGui.QMessageBox.Ok, 
 			 QtGui.QMessageBox.Ok)
 		else:
-			self.dane.dopasuj(self.linie[0].get_xdata()[0],self.linie[1].get_xdata()[0],self.linie[2].get_xdata()[0],self.m1,self.m2)	
-			self.ui.widget.canvas.ax.clear()
-			self.ui.widget.canvas.ax.plot(self.dane.y,'go')
-			self.ui.widget.canvas.ax.plot(self.dane.x,self.dane.gaus2(self.dane.x,self.dane.popt[0],self.dane.popt[1],self.dane.popt[2],self.dane.popt[3],self.dane.popt[4],self.dane.popt[5]),'r',label='fit', linewidth=3.0)
-			self.ui.widget.canvas.ax.plot(self.dane.x,self.dane.gaus(self.dane.x,self.dane.poptL[0],self.dane.poptL[1],self.dane.poptL[2]),'r--')
-			self.ui.widget.canvas.ax.plot(self.dane.x,self.dane.gaus(self.dane.x,self.dane.poptR[0],self.dane.poptR[1],self.dane.poptR[2]),'r--')
-			self.ui.widget.canvas.draw()
+			
+			try:
+				self.dane.dopasuj(self.linie[0].get_xdata()[0],self.linie[1].get_xdata()[0],self.linie[2].get_xdata()[0],self.m1,self.m2)	
+				self.ui.widget.canvas.ax.clear()
+				self.ui.widget.canvas.ax.plot(self.dane.y,'go')
+				self.ui.widget.canvas.ax.plot(self.dane.x,self.dane.gaus2(self.dane.x,self.dane.popt[0],self.dane.popt[1],self.dane.popt[2],self.dane.popt[3],self.dane.popt[4],self.dane.popt[5]),'r',label='fit', linewidth=3.0)
+				self.ui.widget.canvas.ax.plot(self.dane.x,self.dane.gaus(self.dane.x,self.dane.poptL[0],self.dane.poptL[1],self.dane.poptL[2]),'r--')
+				self.ui.widget.canvas.ax.plot(self.dane.x,self.dane.gaus(self.dane.x,self.dane.poptR[0],self.dane.poptR[1],self.dane.poptR[2]),'r--')
+				self.ui.widget.canvas.draw()
+				
+			except RuntimeError:
+				QtGui.QMessageBox.critical(self, u'Błąd dopasowania !',
+			u"Nie można dopasować krzywej do podanego obszaru. Upewnij się, że zaznaczony obszar ma charakter podwójnej krzywej Gaussa.", QtGui.QMessageBox.Ok, 
+			 QtGui.QMessageBox.Ok)
+			
+			finally:
+				tekst = "                      lewy       | prawy \n wysokosc:  {0:.2f}  | {1:.2f}  \n poz. srodka: {2:.2f} | {3:.2f} \n szerokosc: {4:.2f}       | {5:.2f}".format(self.dane.poptL[0], self.dane.poptR[0],self.dane.poptL[1], self.dane.poptR[1],self.dane.poptL[2], self.dane.poptR[2] )
+				QtGui.QMessageBox.information(self, 'Dopasowano ! !',
+			tekst, QtGui.QMessageBox.Ok, 
+			 QtGui.QMessageBox.Ok)
+
 			self.m1=[0,0]
 			self.m2=[0,0]
 			self.linie = [0,0,0]
@@ -79,8 +116,8 @@ class GUIForm(QtGui.QMainWindow):
 		klawisz = QtGui.QApplication.keyboardModifiers()
 		if klawisz == QtCore.Qt.ControlModifier: #ctrl
 			if len(self.pliki) == 0:
-				QtGui.QMessageBox.question(self, 'Blad dopasowania !',
-			"Zaznaczanie wartosci jest mozliwe dopiero po otwarciu plikow. Nacisnij przycisk otworz i wybierz pliki.", QtGui.QMessageBox.Ok, 
+				QtGui.QMessageBox.critical(self, u'Błąd dopasowania !',
+			u"Zaznaczanie wartosci jest mozliwe dopiero po otwarciu plików. Naciśnij przycisk otwórz i wybierz pliki.", QtGui.QMessageBox.Ok, 
 			 QtGui.QMessageBox.Ok)
 			else:
 				if event.button==1: #lpm
@@ -95,7 +132,7 @@ class GUIForm(QtGui.QMainWindow):
 							self.ui.lewyTekst.setText( "lewy punkt: "+( str(int(self.linie[0].get_xdata()[0]))))
 							
 						elif self.licznik==1:
-							self.ui.srodekTekst.setText('srodkowy punkt: '+ str(int(self.linie[1].get_xdata()[0])))
+							self.ui.srodekTekst.setText(u'środkowy punkt: '+ str(int(self.linie[1].get_xdata()[0])))
 							
 						else:
 							self.ui.prawyTekst.setText('prawy punkt: '+ str(int(self.linie[2].get_xdata()[0])))	
@@ -148,8 +185,8 @@ class GUIForm(QtGui.QMainWindow):
 		
 	def EksportujDane(self):
 		if type(self.dane.pcov) ==int:
-			QtGui.QMessageBox.question(self, 'Blad eksportowania !',
-			"Aby eksportowac dane do pliku krzywe musza zostac dopasowane. Zaznacz punkty i dopasuj krzywe", QtGui.QMessageBox.Ok, 
+			QtGui.QMessageBox.critical(self, u'Błąd eksportowania !',
+			u"Aby eksportować dane do pliku krzywe muszą zostać dopasowane. Zaznacz punkty i dopasuj krzywe", QtGui.QMessageBox.Ok, 
 			 QtGui.QMessageBox.Ok)
 		else:
 			
@@ -157,7 +194,11 @@ class GUIForm(QtGui.QMainWindow):
 			if plik:
 				self.dane.zapiszDane(plik)
 			
-	def OtworzPliki(self):
+	def OtworzPliki(self): # po dopasowaniu gdy chcemy na nowo cos wczytac zeby nie platal sie ten rysunek z dopasowaniem jest on usuwany i tworzone na nowo wszystko
+		if type(self.dane.popt)!=int:
+			self.resetujWartosci()
+			self.ui.widget.canvas.ax.clear()
+			
 		self.pliki =[]
 		self.dane = dane()
 		for path in QtGui.QFileDialog.getOpenFileNames(self, 'Open File',".","(*.dat)"):
@@ -168,7 +209,7 @@ class GUIForm(QtGui.QMainWindow):
 				self.dane.wczytajDane(str(path))
 
 			self.listaDanych.append(self.dane)
-			
+				
 			for i  in self.listaDanych:		
 				self.ui.widget.canvas.ax.plot(self.dane.y,'o')	
 				self.ui.widget.canvas.draw()
@@ -177,15 +218,16 @@ class GUIForm(QtGui.QMainWindow):
 			self.licznik=0
 			self.ui.lewyTekst.setText( "lewy punkt: ")
 			self.ui.prawyTekst.setText( "prawy punkt: ")
-			self.ui.srodekTekst.setText( "srodkowy punkt: ")
+			self.ui.srodekTekst.setText( u"srodkowy punkt: ")
 			self.ui.maxlewyTekst.setText("lewe max: ")
 			self.ui.maxprawyTekst.setText("prawe max: ")
+
 
 	def closeEvent(self, event):
 		sound_file = "Windows Exclamation.wav"
 		QtGui.QSound.play(sound_file)       
 		odp = QtGui.QMessageBox.question(self, 'Uwaga !',
-			"Czy na pewno zamknac?", QtGui.QMessageBox.Yes | 
+			u"Czy na pewno zamknąc?", QtGui.QMessageBox.Yes | 
 			QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 		
 		if odp == QtGui.QMessageBox.Yes:
@@ -197,6 +239,16 @@ class GUIForm(QtGui.QMainWindow):
 		else:
 			event.ignore()  
 
+	def resetujWartosci(self):
+		self.m1=[0,0]
+		self.m2=[0,0]
+		self.licznik=0
+		self.licznik2=0
+		self.listaDanych =[]
+		self.pliki = []
+		self.dane =dane()
+		self.linie = [0,0,0]
+		self.punkty =[0,0]
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
