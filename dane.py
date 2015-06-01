@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy import exp
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join,basename
 
 
 class dane(object):
@@ -22,8 +22,7 @@ class dane(object):
 	popt=0
 	poptR=0
 	poptL=0
-	obraz = plt.figure()
-	
+	nazwa = ''
 	def wczytajDane(self,sciezka):
 		self.sciezka = sciezka
 		f = open(sciezka,'r')
@@ -64,5 +63,25 @@ class dane(object):
 		self.poptL,cov2 = curve_fit(self.gaus,self.x[range(l,s)],self.y[range(l,s)],p0=[m1[1],m1[0],1])
 		self.poptR,cov3 = curve_fit(self.gaus,self.x[range(s,p)],self.y[range(s,p)],p0=[(m2[1],m2[0],1)])
 
-
+	def wybierzMaxPunkt(self,granicaLewa,granicaPrawa):
+		maxy = int(max(self.y[granicaLewa:granicaPrawa]))
+		indexX = granicaLewa + int(np.where(self.y[granicaLewa:granicaPrawa] == maxy)[0][0])
+		return indexX,maxy
+		
+	def ustalNazwe(self,listaPlikow,nr):
+		nazwa = basename(listaPlikow[0]).partition("_")[0]
+		pasujace = True
+		for path in listaPlikow:
+			pasujace = (pasujace and (nazwa == basename(path).partition("_")[0]))
+			
+		if pasujace == True:
+			self.nazwa = nazwa + "["+str(len(listaPlikow))+"]"
+		else:
+			self.nazwa = "wykres"+str(nr[0])
+			nr[0]=nr[0]+1
+				
+			
+			
+				
+		
 

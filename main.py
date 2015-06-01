@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy import exp
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join,basename
 from PyQt4 import QtGui,QtCore
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
 
@@ -24,7 +24,9 @@ class GUIForm(QtGui.QMainWindow):
 	dane =dane()
 	linie = [0,0,0]
 	punkty =[0,0]
-	
+	osx = [0,0]
+	osy= [0,0]
+	nrwykresu=[0] #lista przekazywana przez referencje / int przez wartosc https://sites.google.com/site/usfcomputerscience/functions-and-parameters
 	def __init__(self, parent=None):
 
 		QtGui.QWidget.__init__(self,parent)
@@ -38,6 +40,7 @@ class GUIForm(QtGui.QMainWindow):
 		QtCore.QObject.connect(self.ui.pushButton, QtCore.SIGNAL('clicked()'),lambda: self.PlotFunc())
 		QtCore.QObject.connect(self.ui.pushButton1, QtCore.SIGNAL('clicked()'),lambda: self.OtworzPliki())
 		QtCore.QObject.connect(self.ui.pushButton2, QtCore.SIGNAL('clicked()'),lambda: self.EksportujDane())
+		QtCore.QObject.connect(self.ui.pushButton3, QtCore.SIGNAL('clicked()'),lambda: self.resetujWartosci())
 		
 		self.ui.lewyTekst.mousePressEvent = self.lewyTekstonClick
 		self.ui.srodekTekst.mousePressEvent = self.srodekTekstonClick
@@ -65,26 +68,38 @@ przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do p
 			 
 	def lewyTekstonClick(self,licznik):
 		self.licznik = 0
-		print self.licznik
+
 			
 	def srodekTekstonClick(self,licznik):
 		self.licznik=1
-		print self.licznik
+
 		
 	def prawyTekstonClick(self,licznik):
 		self.licznik=2	
-		print self.licznik
+
 		
 	def lewymaxTekstonClick(self,licznik):
 		self.licznik2=0
 		
 	def PlotFunc(self):
+		
 		if (type(self.linie[0]) == int or type(self.linie[1]) == int or type(self.linie[2]) == int or type(self.m1) == int or type(self.m2) == int):
 			QtGui.QMessageBox.critical(self, u'Błąd dopasowania !',
 			u"Punkty dopasowania nie zostaly ustawione prawidlowo. Do dopasowania potrzeba 3 linii, oraz 2 maksimow", QtGui.QMessageBox.Ok, 
 			 QtGui.QMessageBox.Ok)
 		else:
-			
+			if self.m1==[0,0]:
+				self.m1 =  self.dane.wybierzMaxPunkt(int(self.linie[0].get_xdata()[0]),int(self.linie[1].get_xdata()[0]))
+				self.ui.maxlewyTekst.setText("lewe max: " + str (self.m1))
+			if self.m2 == [0,0]:
+				self.m2 = self.dane.wybierzMaxPunkt(int(self.linie[1].get_xdata()[0]),int(self.linie[2].get_xdata()[0]))
+				self.ui.maxprawyTekst.setText("prawe max: "+str(self.m2))
+			self.osx = self.ui.widget.canvas.ax.get_xlim()
+			self.osy = self.ui.widget.canvas.ax.get_ylim()
+
+			self.dane.popt = 0
+			self.dane.poptL = 0
+			self.dane.poptR = 0
 			try:
 				self.dane.dopasuj(self.linie[0].get_xdata()[0],self.linie[1].get_xdata()[0],self.linie[2].get_xdata()[0],self.m1,self.m2)	
 				self.ui.widget.canvas.ax.clear()
@@ -92,14 +107,20 @@ przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do p
 				self.ui.widget.canvas.ax.plot(self.dane.x,self.dane.gaus2(self.dane.x,self.dane.popt[0],self.dane.popt[1],self.dane.popt[2],self.dane.popt[3],self.dane.popt[4],self.dane.popt[5]),'r',label='fit', linewidth=3.0)
 				self.ui.widget.canvas.ax.plot(self.dane.x,self.dane.gaus(self.dane.x,self.dane.poptL[0],self.dane.poptL[1],self.dane.poptL[2]),'r--')
 				self.ui.widget.canvas.ax.plot(self.dane.x,self.dane.gaus(self.dane.x,self.dane.poptR[0],self.dane.poptR[1],self.dane.poptR[2]),'r--')
+				self.ui.widget.canvas.ax.set_xlim(self.osx)
+
+				self.ui.widget.canvas.ax.set_ylim(self.osy)
+				self.ui.widget.canvas.ax.set_xlabel(u'numer kanału')
+				self.ui.widget.canvas.ax.set_ylabel(u'liczba wystapien')
 				self.ui.widget.canvas.draw()
-				
+				self.ui.parametryPraweTekst.setText("Par. Prawe: w {0:.2f}, sr {1:.2f}, sz {2:.2f}".format(self.dane.poptR[0],self.dane.poptR[1],self.dane.poptR[2]))
+				self.ui.parametryLeweTekst.setText("Par. Lewe: w {0:.2f}, sr {1:.2f}, sz {2:.2f}".format(self.dane.poptL[0],self.dane.poptL[1],self.dane.poptL[2]))
 			except RuntimeError:
 				QtGui.QMessageBox.critical(self, u'Błąd dopasowania !',
 			u"Nie można dopasować krzywej do podanego obszaru. Upewnij się, że zaznaczony obszar ma charakter podwójnej krzywej Gaussa.", QtGui.QMessageBox.Ok, 
 			 QtGui.QMessageBox.Ok)
 			
-			finally:
+			if type(self.dane.poptL) != int:
 				tekst = "                      lewy       | prawy \n wysokosc:  {0:.2f}  | {1:.2f}  \n poz. srodka: {2:.2f} | {3:.2f} \n szerokosc: {4:.2f}       | {5:.2f}".format(self.dane.poptL[0], self.dane.poptR[0],self.dane.poptL[1], self.dane.poptR[1],self.dane.poptL[2], self.dane.poptR[2] )
 				QtGui.QMessageBox.information(self, 'Dopasowano ! !',
 			tekst, QtGui.QMessageBox.Ok, 
@@ -115,7 +136,7 @@ przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do p
 
 		klawisz = QtGui.QApplication.keyboardModifiers()
 		if klawisz == QtCore.Qt.ControlModifier: #ctrl
-			if len(self.pliki) == 0:
+			if   len(self.listaDanych) ==0:
 				QtGui.QMessageBox.critical(self, u'Błąd dopasowania !',
 			u"Zaznaczanie wartosci jest mozliwe dopiero po otwarciu plików. Naciśnij przycisk otwórz i wybierz pliki.", QtGui.QMessageBox.Ok, 
 			 QtGui.QMessageBox.Ok)
@@ -127,7 +148,7 @@ przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do p
 							self.linie[self.licznik].remove()
 							self.ui.widget.canvas.draw()
 							
-						self.linie[self.licznik]=self.ui.widget.canvas.ax.axvline(int (event.xdata), color='r', linestyle='solid')#pionowa kreska na wykresie
+						self.linie[self.licznik]=self.ui.widget.canvas.ax.axvline(int (event.xdata), color='r', linestyle='solid')
 						if self.licznik==0:
 							self.ui.lewyTekst.setText( "lewy punkt: "+( str(int(self.linie[0].get_xdata()[0]))))
 							
@@ -147,17 +168,14 @@ przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do p
 						self.linie[2].remove()
 						self.linie[2]=self.ui.widget.canvas.ax.axvline(int (event.xdata), color='k', linestyle='solid')
 						self.ui.widget.canvas.draw()
-						#print self.licznik
 						
 				elif event.button==3: #ppm
 					if self.licznik2<=1:
-						#print self.punkty
 						if (type(self.punkty[self.licznik2]) != int):
 							self.punkty[self.licznik2].remove
 							self.punkty[self.licznik2].remove()
 							self.ui.widget.canvas.draw()
 						self.punkty[self.licznik2] = plt.Circle((event.xdata,event.ydata),50,color='r')
-						#print dir(self.punkty[1])
 						if self.licznik2 ==0:
 							self.m1=int(event.xdata),int(event.ydata)
 							self.ui.maxlewyTekst.setText("lewe max: " + str (self.m1))
@@ -194,7 +212,8 @@ przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do p
 			if plik:
 				self.dane.zapiszDane(plik)
 			
-	def OtworzPliki(self): # po dopasowaniu gdy chcemy na nowo cos wczytac zeby nie platal sie ten rysunek z dopasowaniem jest on usuwany i tworzone na nowo wszystko
+	def OtworzPliki(self): 
+
 		if type(self.dane.popt)!=int:
 			self.resetujWartosci()
 			self.ui.widget.canvas.ax.clear()
@@ -203,22 +222,26 @@ przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do p
 		self.dane = dane()
 		for path in QtGui.QFileDialog.getOpenFileNames(self, 'Open File',".","(*.dat)"):
 			self.pliki.append(str(path))
-			print str(path)
 		if len(self.pliki)>0:
+			self.ui.widget.canvas.ax.clear()
+			self.dane.ustalNazwe(self.pliki,self.nrwykresu)
 			for path in self.pliki:
 				self.dane.wczytajDane(str(path))
 
 			self.listaDanych.append(self.dane)
-				
-			for i  in self.listaDanych:		
-				self.ui.widget.canvas.ax.plot(self.dane.y,'o')	
-				self.ui.widget.canvas.draw()
 
+			for i  in self.listaDanych:		
+				self.ui.widget.canvas.ax.plot(i.y,'o',label = i.nazwa)
+				self.ui.widget.canvas.draw()
+			self.ui.widget.canvas.ax.legend(loc = 'upper right')
+			self.ui.widget.canvas.ax.set_xlabel(u'numer kanału')
+			self.ui.widget.canvas.ax.set_ylabel(u'liczba wystapien')
+			self.ui.widget.canvas.draw()
 			self.linie = [0,0,0]
 			self.licznik=0
 			self.ui.lewyTekst.setText( "lewy punkt: ")
 			self.ui.prawyTekst.setText( "prawy punkt: ")
-			self.ui.srodekTekst.setText( u"srodkowy punkt: ")
+			self.ui.srodekTekst.setText( u"środkowy punkt: ")
 			self.ui.maxlewyTekst.setText("lewe max: ")
 			self.ui.maxprawyTekst.setText("prawe max: ")
 
@@ -227,7 +250,7 @@ przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do p
 		sound_file = "Windows Exclamation.wav"
 		QtGui.QSound.play(sound_file)       
 		odp = QtGui.QMessageBox.question(self, 'Uwaga !',
-			u"Czy na pewno zamknąc?", QtGui.QMessageBox.Yes | 
+			u"Czy na pewno zamknąć?", QtGui.QMessageBox.Yes | 
 			QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 		
 		if odp == QtGui.QMessageBox.Yes:
@@ -249,7 +272,15 @@ przycisk dopasuj. Po dopasowaniu istnieje możliwość eksportowania danych do p
 		self.dane =dane()
 		self.linie = [0,0,0]
 		self.punkty =[0,0]
-
+		self.ui.widget.canvas.ax.clear()
+		self.ui.widget.canvas.draw()
+		self.ui.lewyTekst.setText( "lewy punkt: ")
+		self.ui.prawyTekst.setText( "prawy punkt: ")
+		self.ui.srodekTekst.setText( u"środkowy punkt: ")
+		self.ui.maxlewyTekst.setText("lewe max: ")
+		self.ui.maxprawyTekst.setText("prawe max: ")
+		self.ui.parametryLeweTekst.setText("Parametry Lewe:")
+		self.ui.parametryPraweTekst.setText("Parametry Prawe:")		
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = GUIForm()
